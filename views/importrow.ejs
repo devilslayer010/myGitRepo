@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CSV Import</title>
+</head>
+<body>
+  <h1>CSV Import</h1>
+  <% if (message) { %>
+    <p><%= message %></p>
+  <% } %>
+  
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="csvFile" accept=".csv" required><br><br>
+    
+    <label for="database">Select Database:</label>
+    <select name="database" id="database" required>
+      <% databaseNames.forEach(function(database) { %>
+        <option value="<%= database %>" <% if (database === locals.selectedDatabase) { %>selected<% } %>><%= database %></option>
+      <% }) %>
+    </select><br><br>
+    
+    
+    
+    <label for="table">Select Table:</label>
+    <select name="table" id="table" required>
+      <% tableNames.forEach(function(table) { %>
+        <option value="<%= table %>"><%= table %></option>
+      <% }) %>
+    </select><br><br>
+    
+    <input type="submit" value="Import CSV">
+  </form>
+
+  <script>
+    // Add an event listener to the database dropdown
+    const databaseDropdown = document.getElementById('database');
+    const tableDropdown = document.getElementById('table');
+
+    databaseDropdown.addEventListener('change', () => {
+      const selectedDatabase = databaseDropdown.value;
+      fetch(`/tables?database=${selectedDatabase}`) // Fetch table names based on the selected database
+        .then(response => response.json())
+        .then(tableNames => {
+          tableDropdown.innerHTML = ''; // Clear the table dropdown
+
+          // Add the table options
+          tableNames.forEach(tableName => {
+            const option = document.createElement('option');
+            option.value = tableName;
+            option.textContent = tableName;
+            tableDropdown.appendChild(option);
+          });
+        })
+        .catch(error => console.error('Error fetching table names:', error));
+    });
+  </script>
+</body>
+</html>
